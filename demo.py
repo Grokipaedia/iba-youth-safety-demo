@@ -1,16 +1,11 @@
 """
-demo.py — Intent-Bound Authorization applied to minor-safety enforcement
-on a content/engagement platform.
+demo.py — Can an autonomous engagement system prove that each action is
+authorized before it happens?
 
-Context (real, dated, verifiable — not the reason this exists, just why
-the timing is relevant): on 26 August 2026, Meta agreed to a roughly
-$17-18B settlement with a coalition of state attorneys general over
-claims it designed Facebook/Instagram to be addictive to minors. The
-settlement mandates concrete technical changes — default daily time
-limits and nighttime access blocks for teens, not just a payment. TikTok
-separately settled with the DOJ for $400M over related child-privacy
-violations, and Snap faces comparable litigation. Three major platforms,
-same underlying gap.
+This demonstrates how Intent-Bound Authorization (IBA) enforces that
+boundary for youth-safety policies on a content/engagement platform: a
+signed, human-declared policy is checked against every proposed action
+before it executes, not audited afterward.
 
 The gap: a recommendation/engagement algorithm is an autonomous system
 taking real actions — serve this video, send this notification, extend
@@ -19,7 +14,19 @@ this specific, vulnerable context. The algorithm has general permission
 to run. It was never verifying that THIS action, for THIS minor, at THIS
 time, falls inside what a parent or a regulation actually authorized.
 That is the same gap between "valid credentials" and "authorized action"
-that IBA targets in every other domain it has been applied to tonight.
+that IBA targets in every other domain it has been applied to — the same
+primitive shown in agentvc-policy-fix (spend/resource authorization) and
+iba-autaxi-demo (autonomous systems), applied here to a third, distinct
+industry.
+
+Real-world reason this matters right now, not the reason it exists: on
+26 August 2026, Meta agreed to a roughly $17-18B settlement with a
+coalition of state attorneys general over claims it designed
+Facebook/Instagram to be addictive to minors. The settlement mandates
+concrete technical changes — default daily time limits and nighttime
+access blocks for teens, not just a payment. TikTok separately settled
+with the DOJ for $400M over related child-privacy violations, and Snap
+faces comparable litigation.
 
 Scope — read this first:
   - This does NOT touch recommendation ML, ranking, or content moderation
