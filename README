@@ -1,0 +1,52 @@
+# iba-youth-safety-demo
+
+**Intent-Bound Authorization (IBA), applied to minor-safety enforcement on a content/engagement platform.**
+
+## Why this, why now
+
+On 26 August 2026, Meta agreed to a roughly **$17–18 billion settlement** with a coalition of dozens of U.S. state attorneys general, resolving claims it knowingly designed Facebook and Instagram to be addictive to minors. The settlement mandates concrete technical changes, not just a payment — **default daily time limits (up to a 1-hour cap for teens)** and **nighttime access blocks**. This isn't isolated to one company: **TikTok separately settled with the DOJ for $400M** over related child-privacy violations, and **Snap faces comparable litigation** right now.
+
+## Scope — read this first
+
+| Layer | Governed here? |
+|---|---|
+| The recommendation/ranking algorithm itself (what content scores highest) | **No.** Untouched. That's a machine-learning problem, not an authorization problem. |
+| Whether a specific proposed action — serve this content, send this notification, extend this session — is authorized for this specific context | **Yes.** This is the layer IBA governs: a pre-execution check against a signed, human-declared policy. |
+
+## The actual gap
+
+A recommendation or engagement algorithm is an autonomous system taking real actions continuously — serve the next video, send a notification, extend a session — with no check that the action was actually authorized for *this specific, vulnerable context*. The algorithm has general permission to run. It never verifies that *this* action, for *this* minor, at *this* time, falls inside what a parent or a regulation actually authorized. That's the same gap between "valid credentials" and "authorized action" that IBA targets in every other domain — dispatch, financial transactions, passenger interactions. Here it's applied to the platform-safety domain the recent settlements are forcing the industry to solve technically.
+
+## What this demo actually does
+
+Five scenarios, run for real — not simulated, not decorative:
+
+1. **Content served during allowed hours, under the daily time cap, in a safe category** → `ALLOW`
+2. **Notification attempted at 11pm**, outside a declared 7am–9pm allowed window → `DENY`
+3. **Session-extension request after the daily cap is nearly exhausted** (58 of 60 minutes used) → `DENY`
+4. **Content-category request for an explicitly blocked category** (e.g. self-harm-adjacent content) → `DENY`
+5. **A session-extension certificate signed by a forged/untrusted key**, attempting to authorize unlimited time → `DENY` (real ECDSA signature verification failure, not a stub check)
+
+Every certificate uses real ECDSA (P-256) signing via Python's `cryptography` library. Every check is deny-by-default: an action is only allowed if signature, expiry, action type, and every declared scope boundary all pass. Every decision is written to a hash-chained audit log, and the chain's integrity is verified at the end of the run.
+
+## Run it yourself
+
+```bash
+pip install cryptography --break-system-packages
+python3 demo.py
+```
+
+No mocked output. What you see in your terminal is what actually ran.
+
+## Status
+
+This is a demonstration of the mechanism, not a deployed product. It does not integrate with any real platform, and makes no claim of adoption, discussion, or awareness by any named company. Nothing here should be read as a claim that Meta, TikTok, Snap, or any other platform uses, endorses, or is aware of this specific implementation.
+
+## Related
+
+- Patent application: GB2603013.0 (UK IPO), priority date 10 February 2026 — **pending, not granted**
+- PCT coverage across 150+ countries
+- Technical disclosures: NIST Docket NIST-2025-0035, NCCoE AI Agent Identity and Authorization program
+- IETF draft: draft-williams-intent-token-00
+- Related demos: [iba-autaxi-demo](https://github.com/Grokipaedia/iba-autaxi-demo), [agentvc-policy-fix](https://github.com/Grokipaedia/agentvc-policy-fix)
+- [IntentBound.com](https://intentbound.com) — the framework this is a case study for
