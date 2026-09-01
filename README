@@ -1,10 +1,38 @@
 # iba-youth-safety-demo
 
-**Intent-Bound Authorization (IBA), applied to minor-safety enforcement on a content/engagement platform.**
+**Can an autonomous engagement system prove that each action is authorized before it happens?**
 
-## Why this, why now
+This demo shows how Intent-Bound Authorization (IBA) can enforce that boundary for youth-safety policies — a signed, human-declared policy is checked against every proposed platform action *before* it executes, not audited afterward.
 
-On 26 August 2026, Meta agreed to a roughly **$17–18 billion settlement** with a coalition of dozens of U.S. state attorneys general, resolving claims it knowingly designed Facebook and Instagram to be addictive to minors. The settlement mandates concrete technical changes, not just a payment — **default daily time limits (up to a 1-hour cap for teens)** and **nighttime access blocks**. This isn't isolated to one company: **TikTok separately settled with the DOJ for $400M** over related child-privacy violations, and **Snap faces comparable litigation** right now.
+## The architecture, in six boxes
+
+```
+┌──────────┐   ┌─────────────┐   ┌─────────────────┐   ┌──────────┐   ┌────────┐   ┌──────────┐
+│ Policy   │──▶│ Intent      │──▶│ Proposed        │──▶│ IBA Gate │──▶│ ALLOW  │──▶│ Audit    │
+│ (parent/ │   │ Certificate │   │ Action          │   │ (checks  │   │ / DENY │   │ (hash-   │
+│ policy)  │   │ (signed,    │   │ (serve content, │   │ scope)   │   │        │   │ chained) │
+│          │   │ scoped,     │   │ send notif,     │   │          │   │        │   │          │
+│          │   │ time-bound) │   │ etc.)           │   │          │   │        │   │          │
+└──────────┘   └─────────────┘   └─────────────────┘   └──────────┘   └────────┘   └──────────┘
+```
+
+A human or a policy declares intent once, signs it. Every action the platform's algorithm wants to take is checked against that signed certificate at the gate, before execution. Outside the declared scope: deny by default. The decision — either way — is written to a tamper-evident log.
+
+## Same primitive, different domain
+
+This is the same underlying mechanism shown twice already in different industries, not a new architecture per demo:
+
+| Domain | The rule | Repo |
+|---|---|---|
+| **Spend / resource authorization** | Don't let an agent's own unverified claim trigger a real action — self-reported grades were being trusted to auto-merge to production with no verification, the same "let the agent police its own spend" gap Ramp Labs described publicly. | [agentvc-policy-fix](https://github.com/Grokipaedia/agentvc-policy-fix) |
+| **Autonomous systems** | Don't let a dispatch or passenger-AI decision execute outside its declared scope — the core driving stack stays untouched; the agentic layer around it doesn't. | [iba-autaxi-demo](https://github.com/Grokipaedia/iba-autaxi-demo) |
+| **Youth safety** | Don't let an engagement action — serve this content, send this notification, extend this session — execute outside a signed safety policy. | *this repo* |
+
+Ten demos that all do the same thing in the same domain would prove less than three that show the same primitive holding up across genuinely different industries.
+
+## Why this domain is a particularly clear example
+
+Real-world reason this matters right now, not the starting point for the idea: on 26 August 2026, Meta agreed to a roughly **$17–18 billion settlement** with a coalition of U.S. state attorneys general over claims it designed Facebook and Instagram to be addictive to minors, mandating default daily time limits and nighttime access blocks for teens. **TikTok separately settled with the DOJ for $400 million** over related child-privacy violations, and **Snap faces comparable litigation**. Three platforms, one underlying gap: an engagement algorithm taking real actions with no check that the action was authorized for this specific, vulnerable context. Youth safety just makes "authorization at the moment of action" unusually easy to explain — everyone immediately understands why a notification at 11pm to a 14-year-old should require more than "the algorithm generally has permission to run."
 
 ## Scope — read this first
 
@@ -12,10 +40,6 @@ On 26 August 2026, Meta agreed to a roughly **$17–18 billion settlement** with
 |---|---|
 | The recommendation/ranking algorithm itself (what content scores highest) | **No.** Untouched. That's a machine-learning problem, not an authorization problem. |
 | Whether a specific proposed action — serve this content, send this notification, extend this session — is authorized for this specific context | **Yes.** This is the layer IBA governs: a pre-execution check against a signed, human-declared policy. |
-
-## The actual gap
-
-A recommendation or engagement algorithm is an autonomous system taking real actions continuously — serve the next video, send a notification, extend a session — with no check that the action was actually authorized for *this specific, vulnerable context*. The algorithm has general permission to run. It never verifies that *this* action, for *this* minor, at *this* time, falls inside what a parent or a regulation actually authorized. That's the same gap between "valid credentials" and "authorized action" that IBA targets in every other domain — dispatch, financial transactions, passenger interactions. Here it's applied to the platform-safety domain the recent settlements are forcing the industry to solve technically.
 
 ## What this demo actually does
 
@@ -40,7 +64,7 @@ No mocked output. What you see in your terminal is what actually ran.
 
 ## Status
 
-This is a demonstration of the mechanism, not a deployed product. It does not integrate with any real platform, and makes no claim of adoption, discussion, or awareness by any named company. Nothing here should be read as a claim that Meta, TikTok, Snap, or any other platform uses, endorses, or is aware of this specific implementation.
+This is a demonstration of the mechanism, not a deployed product. It does not integrate with any real platform, and makes no claim of adoption, discussion, or awareness by any named company. Nothing here should be read as a claim that Meta, TikTok, Snap, or any other platform uses, endorses, or is aware of this specific implementation. Distinguishing what's demonstrated from what's claimed is deliberate, not a hedge — it's what makes the rest of this credible.
 
 ## Related
 
@@ -48,5 +72,5 @@ This is a demonstration of the mechanism, not a deployed product. It does not in
 - PCT coverage across 150+ countries
 - Technical disclosures: NIST Docket NIST-2025-0035, NCCoE AI Agent Identity and Authorization program
 - IETF draft: draft-williams-intent-token-00
-- Related demos: [iba-autaxi-demo](https://github.com/Grokipaedia/iba-autaxi-demo), [agentvc-policy-fix](https://github.com/Grokipaedia/agentvc-policy-fix)
+- Related demos: [agentvc-policy-fix](https://github.com/Grokipaedia/agentvc-policy-fix) (spend/resource authorization), [iba-autaxi-demo](https://github.com/Grokipaedia/iba-autaxi-demo) (autonomous systems)
 - [IntentBound.com](https://intentbound.com) — the framework this is a case study for
